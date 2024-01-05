@@ -3,7 +3,7 @@
 
 use PHPUnit\Framework\TestCase;
 
-class Test extends TestCase
+class MockTest extends TestCase
 {
     public function testMock()
     {
