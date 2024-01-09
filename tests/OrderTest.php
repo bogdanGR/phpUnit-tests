@@ -10,34 +10,27 @@ class OrderTest extends TestCase
         Mockery::close();
     }
 
-    public function testOrderInProcessed()
+    public function testOrderIsProcessedUsingMock()
     {
-        // we can create mock of non-existing class
-        // use getMockBuilder instead
-        $gateway = $this->getMockBuilder('PaymentGateway')
-            ->setMethods(['charge'])
-            ->getMock();
+        $order = new Order(3, 1.99);
+        $this->assertEquals(5.97, $order->amount);
 
-        $gateway->expects($this->once())
-                ->method('charge')
-                ->with($this->equalTo(250))
-                ->willReturn(true);
-
-        $order = new Order($gateway);
-        $order->amount = 250;
-        $this->assertTrue($order->process());
+        $gatewayMock = Mockery::mock('PaymentGateway');
+        $gatewayMock->shouldReceive('charge')
+                    ->once()
+                    ->with(5.97);
+        $order->process($gatewayMock);
     }
-
-    public function testOrderIsProccessedUsingMockery()
+    public function testOrderIsProcessedUsingSpy()
     {
-        $gateway = Mockery::mock('PaymentGateway');
-        $gateway->shouldReceive('charge')
-                ->once()
-                ->with(250)
-                ->andReturn(true);
+        $order = new Order(3, 1.99);
+        $this->assertEquals(5.97, $order->amount);
 
-        $order = new Order($gateway);
-        $order->amount = 250;
-        $this->assertTrue($order->process());
+        $gatewaySpy = Mockery::spy('PaymentGateway');
+        $order->process($gatewaySpy);
+
+        $gatewaySpy->shouldHaveReceived('charge')
+                    ->once()
+                    ->with(5.97);
     }
 }
